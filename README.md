@@ -2,9 +2,7 @@
 
 ## Overview
 
-This project leverages Microsoft Azure services, including Azure Data Factory (ADF), Azure Data Lake Storage Gen2 (ADLS Gen2), Azure Data Bricks (ADB), and Azure Data Flow, to analyze COVID-19 data. The goal of this project is to demonstrate how Azure's powerful data analytics and processing capabilities can be harnessed to gain insights from a global health crisis.
-
-![Azure Logo](azure_logo.png)
+This comprehensive COVID-19 analysis project leverages Microsoft Azure services to perform seamless data ingestion, transformation, and loading into SQL databases. The project utilizes Azure tools for efficient data handling, employing Azure Data Factory for ingestion, Azure Databricks for data transformation, and Azure SQL Database for storage. Additionally, Power BI is integrated to visualize and analyze the transformed data, offering insightful dashboards and reports. This end-to-end solution provides a robust framework for studying and understanding COVID-19 trends, enabling users to gain valuable insights from the data. The project's GitHub repository contains detailed documentation, code, and configurations, facilitating easy replication and customization for diverse analytical purposes.
 
 ## Table of Contents
 
@@ -22,72 +20,71 @@ This project leverages Microsoft Azure services, including Azure Data Factory (A
 Before you get started, you will need the following:
 
 - An Azure subscription
-- Basic knowledge of Azure Data Factory, Azure Data Lake Storage Gen2, Azure Data Bricks, and Azure Data Flow
+- Azure Data Factory (ADF): Ensure access to and familiarity with Azure Data Factory for orchestrating data workflows, including data ingestion from various sources into Azure services.
+- Azure Databricks (ADB): Familiarity with Azure Databricks is essential for data transformation tasks, as it provides a collaborative Apache Spark-based analytics platform for processing large-scale data.
+- Azure SQL Database (ASQL): Proficiency in setting up and managing Azure SQL Database, as it serves as the storage solution for processed data in this project.
+- Azure Subscription: Access to an active Azure subscription is required to utilize the Azure services (ADF, ADB, ASQL) and deploy resources necessary for data management and analysis.
+- Power BI: Basic understanding of Power BI for data visualization and reporting purposes, as the project integrates Power BI to create insightful dashboards and reports based on the transformed data from Azure services.
 
 ## Project Structure
 
 The project is organized into the following sections:
 
-- **Setup**: Instructions for setting up your Azure environment and resources.
-- **Data Ingestion**: Details on how to ingest COVID-19 data into Azure Data Lake Storage Gen2 using Azure Data Factory.
-- **Data Transformation**: How to use Azure Data Flow for data cleansing, transformation, and preparation.
-- **Data Analysis**: Examples of data analysis using Azure Data Bricks.
-- **Results**: The insights and findings obtained from the analysis.
+- **Setup**: Step-by-step instructions for configuring your Azure environment and setting up necessary resources.
+- **Data Ingestion**: Detailed guidance on acquiring COVID-19 data from the ECDC website and efficiently ingesting it into Azure Data Lake Storage Gen2 using Azure Data Factory.
+- **Data Transformation**: Utilizing Azure Databricks for comprehensive data cleansing, transformation, and preparation, ensuring the data is refined for subsequent analysis.
+- **Data Loading to Azure SQL**: Instructions for transferring the transformed data from Azure Data Lake or Azure Databricks to Azure SQL Database, facilitating easy access and retrieval of data.
+- **Data Analysis using Power BI**: Demonstrating the process of fetching data from Azure SQL Database into Power BI for in-depth analysis, visualizations, and report generation.
+- **Results**: A detailed overview of insights, trends, and findings derived from the data analysis using Power BI, showcasing the project's outcomes and conclusions.
+
 
 ## Setup
 
-1. Create an Azure Data Lake Storage Gen2 account.
-2. Set up an Azure Data Factory instance.
-3. Configure an Azure Data Bricks workspace.
-4. Prepare your development environment, including installing required libraries.
+1. Create an Azure Account
+2. Create an Azure Data Lake Storage Gen2 account.
+3. Create an Azure Blob Storage account
+4. Creat an Azure SQL Database
+5. Set up an Azure Data Factory instance.
+6. Configure an Azure Data Bricks workspace.
+7. Prepare your development environment, including installing required libraries.
 
 ## Data Ingestion
 
 In this section, we provide steps and scripts to ingest COVID-19 data into your Azure Data Lake Storage Gen2 account using Azure Data Factory. You can schedule data ingestion jobs to keep your data up to date.
 To perform data ingestion from the European Centre for Disease Prevention and Control (ECDC) website to Azure Data Lake Storage Gen2 (ADLS Gen2), you can follow these steps:
 
-1. **Create an Azure Data Lake Storage Gen2 Account**:
+![Screenshot (76)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/857ef53d-4519-43ba-966e-5d02223ed4fa)
 
-   If you don't already have an ADLS Gen2 account, you'll need to create one in your Azure portal.
+### Step 1: JSON Configuration File
+- Create a `config.json` file containing source URLs and sink file names for each dataset.
+- Sample JSON structure:
+    ```json
+    [
+        {
+            "sourceBaseUrl": "https://example.com/hospital_data",
+            "sourceRelativeUrl": "/hospital_data.json",
+            "sinkFileName": "hospital_admission_data.json"
+        },
+        // Other dataset configurations follow the same format...
+    ]
+    ```
+### Step 2: Azure Data Factory Setup
+- Use Azure Data Factory to configure a Lookup activity to fetch dataset configurations from the `config.json` file.
+- Define parameters to read source URLs and sink file names.
 
-2. **Get the Data Source URL**:
+### Step 3: ForEach Activity for Data Copy
+- Implement a ForEach activity in Azure Data Factory to iterate through each dataset listed in `config.json`.
+- Use parameters retrieved from the Lookup activity to copy data from specified source URLs to Azure Data Lake Storage Gen2.
 
-   Visit the ECDC website and locate the data source you want to ingest. Most likely, you will find downloadable datasets or data feeds.
+### Step 4: Data Storage in Data Lake Gen2
+- Organize data into a 'raw' folder structure within Azure Data Lake Storage Gen2.
+- Store datasets in respective 'raw' folders based on sink file names specified in `config.json`.
 
-3. **Set Up Azure Data Factory**:
+### Step 5: Pipeline Execution and Validation
+- Run the Azure Data Factory pipeline to trigger data ingestion.
+- Review execution logs to confirm successful ingestion for each dataset.
+- Validate dataset presence in the designated 'raw' folders within Azure Data Lake Storage Gen2.
 
-   - Create an Azure Data Factory instance if you don't have one. Azure Data Factory is a cloud-based data integration service that allows you to create, schedule, and manage data-driven workflows.
-   - Configure the linked services in Azure Data Factory to connect to your ECDC data source. You'll typically use an HTTP linked service to access data from a URL.
-
-4. **Create a Pipeline**:
-
-   - In your Azure Data Factory, create a new pipeline to define the data ingestion process.
-   - Add an activity to the pipeline, such as a Copy Data activity, to fetch data from the ECDC website. Configure this activity with the HTTP linked service created in the previous step.
-
-5. **Configure the Data Source**:
-
-   - Specify the URL of the data source on the ECDC website in the source dataset settings.
-   - Define the data format and any required authentication details if necessary.
-
-6. **Set the Data Sink**:
-
-   - Create a dataset for your ADLS Gen2 account as the destination for the data.
-   - Define the folder or container path where the data should be stored in your ADLS Gen2 account.
-
-7. **Mapping and Transformation**:
-
-   - If needed, you can add data mapping or transformation steps in the pipeline to format the data according to your requirements.
-
-8. **Schedule and Monitor**:
-
-   - Schedule the pipeline to run at regular intervals, ensuring that your ADLS Gen2 data is up to date.
-   - Monitor the pipeline runs for any errors or issues.
-
-9. **Data Validation**:
-
-   After the data ingestion, perform data validation to ensure that the data in ADLS Gen2 matches the source data from ECDC accurately.
-
-By following these steps, you can set up a data ingestion process that fetches data from the ECDC website and stores it in your Azure Data Lake Storage Gen2 account, making it readily available for analysis and reporting within your Azure environment.
 ## Data Transformation
 
 Azure Data Flow is used to clean, transform, and prepare the data for analysis. We provide examples of data transformation tasks and best practices.
