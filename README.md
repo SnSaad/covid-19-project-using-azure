@@ -85,125 +85,89 @@ To perform data ingestion from the European Centre for Disease Prevention and Co
 - Review execution logs to confirm successful ingestion for each dataset.
 - Validate dataset presence in the designated 'raw' folders within Azure Data Lake Storage Gen2.
 
-## Data Transformation
+## Data Transformation using Data Flow and Data Bricks
 
 Azure Data Flow is used to clean, transform, and prepare the data for analysis. We provide examples of data transformation tasks and best practices.
 
-Data transformation in Azure for COVID-19 data involves cleaning, structuring, and preparing the data for analysis. Here are the steps for data transformation using Azure services like Azure Data Factory, Azure Data Flow, and Azure Data Bricks:
+### Cases and Deaths Data
 
-1. **Data Extraction**:
-   - In Azure Data Factory, create a new pipeline for data transformation.
-   - Use a source dataset to read data from your Azure Data Lake Storage Gen2 where the COVID-19 data was ingested.
-   - Connect the source dataset to the raw data in ADLS Gen2.
+#### Overview
+This section outlines the data transformation process for hospital admission data using Azure Data Flow within Azure Data Factory. The transformation steps include filtering data for European countries, pivoting columns, performing a lookup to acquire additional country codes, and finally storing the processed file in the Data Lake Storage Gen2 within the 'processed' folder.
+![Screenshot (86)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/f435504b-d1af-410e-bbdd-c13522ac2814)
+![Screenshot (84)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/86061ea9-c841-46a5-8075-b95264520bbc)
 
-2. **Data Cleansing**:
-   - Use Azure Data Flow to clean the data. You can filter out irrelevant columns, remove duplicates, handle missing values, and correct data types.
-   - Implement quality checks to ensure data integrity and consistency.
+#### Transformation Steps
+1. **Source Data**: Ingest hospital admission data from the specified data source.
+2. **Filtering for European Countries**: Apply a filter to extract data exclusively for European countries from the dataset.
+3. **Pivoting Columns**: Utilize Azure Data Flow to pivot columns, such as 'country' and additional relevant fields, for better analysis and visualization.
+4. **Lookup Operation**: Perform a lookup operation to retrieve the two-digit and three-digit country codes to enrich the dataset.
+5. **Sink Processed Data**: Store the transformed and enriched dataset into Data Lake Storage Gen2 within the 'processed' folder for subsequent analysis and reporting.
 
-3. **Data Enrichment**:
-   - If needed, you can join the COVID-19 data with other datasets to add more context or information. For instance, you might want to join the COVID-19 data with population data, geographical information, or healthcare resource data.
+## Hospital Admission Dataset Transformation Process
+![Screenshot (87)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/c749aadd-dbb4-4a9b-bb0e-ed5ad72f1eec)
+![Screenshot (81)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/4dd5795b-5f97-40ae-be19-a465d80c8d16)
 
-4. **Data Transformation**:
-   - Use Data Flow to perform transformations like aggregations, pivot/unpivot, and data format conversions.
-   - Apply business rules and calculations specific to your analysis goals.
+### Transformation Steps
+1. **Source Data Extraction**: Retrieve the Hospital Admission dataset from the source.
+2. **Conditional Splitting - Weekly and Daily Data**: Implement a conditional split to separate the data into weekly and daily records based on a defined condition. 
+3. **Lookup Operation for Country Codes**: Utilize lookup activities to fetch country_2_digit_code and country_3_digit_code based on specific criteria for each record.
+4. **Derived Column Creation - ecdc_year_week**: Create a derived column 'ecdc_year_week' using an expression combining year and week_of_year formatted as 'year-w-week_number'.
+5. **Joining Weekly Datasets**: Merge individual weekly datasets into a single comprehensive dataset for further processing.
+6. **Group By Operations**: Group the data by country, country_code_2_digit, country_code_3_digit, population, reported_date, week_start_date, week_end_date, and source.
+7. **Derived Column - Matching Year-Weeks**: Create a derived column to validate if reported_year_week matches ecdc_year_week for data consistency.
+8. **Pivoting Operation**: Perform pivoting on columns, such as 'country,' to restructure the dataset for easier analysis and reporting.
+9. **Data Sinking**: Sink the transformed data into Azure Data Lake Storage within the 'processed' folder, separating daily and weekly datasets for storage and future usage.
 
-5. **Data Partitioning**:
-   - Consider partitioning your data in ADLS Gen2 for better query performance. You can partition data by date, location, or other relevant criteria.
-   - This is especially useful if you have large datasets, as it can significantly improve query speed.
+#### How to Use
+1. Open Azure Data Factory and navigate to the Azure Data Flow for cases_deaths data and hospital admission data transformation.
+2. Configure the transformation steps as described above, specifying the source, filter, pivot, lookup, and sink operations.
 
-6. **Data Validation**:
-   - Implement data validation checks to ensure that the transformed data adheres to quality standards and business rules.
-   - Identify and handle any anomalies or errors in the data.
+### Data Transformation using Azure Databricks for Population Data
+### Overview
+This section details the process of data transformation using Azure Databricks for the Population dataset. The transformation involves mounting the data lake, filtering data to retain only the year 2019, grouping records by age using PySpark, and executing the transformation through a Databricks notebook activity.
+![Screenshot (93)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/7a54679c-6ddb-4aa5-a7bb-31dc20ea1cd3)
+![Screenshot (94)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/cd641d3a-98e7-449f-9202-e391e48e2dda)
 
-7. **Data Loading**:
-   - Create a destination dataset in Azure Data Factory for storing the transformed data.
-   - Configure the dataset to write data to a specific folder or container in your ADLS Gen2 account.
+### Transformation Steps
 
-8. **Data Publication**:
-   - After data transformation, make the transformed data available for analysis by your data scientists or other stakeholders.
-   - Ensure that the data is accessible through Azure services like Azure Data Bricks for advanced analytics.
+1. **Mounting Data Lake on Databricks**: Configure Azure Databricks to mount the data lake folder containing the population dataset, enabling access within the Databricks environment.
+2. **Filtering Records for Year 2019**: Utilize PySpark to filter the population dataset, retaining data only for the year 2019 and removing records from other years.
+3. **Grouping by Age**: Implement PySpark operations to group records based on age, aggregating data and creating structured groups for analysis.
+4. **Databricks Notebook Activity**: Create a Databricks notebook containing the PySpark code for the aforementioned transformation steps.
+5. **Execution of Transformation**: Execute the Databricks notebook activity within Azure Data Factory to run the PySpark code and perform the data transformation operations.
 
-9. **Automation and Scheduling**:
-   - Schedule the data transformation pipeline to run at regular intervals to keep the data up to date.
-   - Set up alerts or notifications in case of data transformation failures.
+# Copy Data to Azure SQL Database
+## Overview
+This section delineates the process of creating an Azure SQL Database named 'covid_reporting' and its associated tables ('hospital admission', 'cases and deaths', 'testing', 'population'). Subsequently, it details the utilization of the Copy Data activity in Azure Data Factory to transfer data from the 'processed' folder in Azure Data Lake Storage to their respective tables in the Azure SQL Database.
+![Screenshot (91)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/2fb94bb5-ce90-4abf-96d9-370f067569a5)
+![Screenshot (96)](https://github.com/SnSaad/covid-19-project-using-azure/assets/98678581/bdcf79bb-ffec-4ca2-bcc5-b86dd880be3f)
 
-By following these data transformation steps in Azure, you can ensure that your COVID-19 data is properly prepared for analysis, making it easier for data scientists and analysts to derive meaningful insights from the data.
 
-## Data Analysis
+### Steps
+1. **Creating Azure SQL Database and Tables**:
+   - Establish an Azure SQL Database named 'covid_reporting'.
+   - Create tables within the database for 'hospital admission', 'cases and deaths', 'testing', and 'population' datasets.
+2. **Configuring Copy Data Activity**:
+   - Implement a Copy Data activity in Azure Data Factory to facilitate the data transfer process.
+   - Configure source and sink settings within the Copy Data activity to extract data from the 'processed' folder in Azure Data Lake Storage and load it into the corresponding tables in the 'covid_reporting' Azure SQL Database.
 
-Azure Data Bricks is employed for advanced data analysis. We demonstrate how to load data, perform analytics, and visualize the results using various Spark libraries and tools.
+# Power BI Data Fetch and Analysis
 
-Analyzing COVID-19 data using Azure Databricks involves a series of steps, including data loading, exploration, transformation, and visualization. Here are the key analysis steps you can follow:
+## Overview
 
-1. **Data Loading**:
-   - Load the cleaned and transformed COVID-19 data from Azure Data Lake Storage Gen2 (ADLS Gen2) or your preferred data source into your Databricks workspace. You can use Databricks' built-in data connectors or libraries to read the data.
+This section describes the process of retrieving data from Azure SQL Database into Power BI for analysis. It outlines the configurations required to establish the connection between Power BI and Azure SQL, and highlights the analysis performed using Power BI.
 
-2. **Data Exploration**:
-   - Start by examining the structure of your dataset. You can use Databricks to display the first few rows of your data to understand its format and column names.
-   - Check for missing values, outliers, and anomalies in the data.
-   - Perform basic summary statistics to get an initial understanding of the dataset's characteristics.
-
-3. **Data Preprocessing**:
-   - Depending on your specific analysis goals, you may need to further preprocess the data. This can include data aggregation, grouping, filtering, or creating new derived features.
-   - Handle data types and formatting to ensure the data is suitable for analysis.
-
-4. **Data Visualization**:
-   - Utilize Databricks' data visualization capabilities to create meaningful plots, charts, and graphs. You can use libraries like Matplotlib, Seaborn, or Plotly in Python to generate visualizations.
-   - Visualize key COVID-19 statistics over time, by region, or according to other relevant dimensions.
-
-5. **Statistical Analysis**:
-   - Conduct statistical analyses to identify trends and correlations in the COVID-19 data. You can use Databricks' built-in statistical functions and libraries like NumPy and SciPy.
-   - Perform time series analysis to understand the progression of the pandemic.
-
-By following these steps, you can conduct a comprehensive analysis of COVID-19 data in Azure Databricks, enabling you to extract meaningful insights and make data-driven decisions related to the pandemic.
-
-## Results
-
-The results section presents the insights obtained from the analysis, including visualizations, statistical summaries, and any significant findings related to COVID-19 data.
-
-Results and insights derived from the analysis of COVID-19 data using Azure Databricks can provide valuable information for decision-making and understanding the pandemic's impact. Here are some example results and insights that might arise from such an analysis:
-
-### 1. Temporal Trends:
-
-**Result:** Analysis of the data reveals that COVID-19 cases exhibited a pronounced surge in the winter months of 2020.
-
-**Insight:** Seasonal variations can have a significant impact on the spread of the virus. Understanding these patterns can aid in resource allocation and public health measures during specific times of the year.
-
-### 2. Geographic Hotspots:
-
-**Result:** Through geospatial analysis, it's evident that urban areas and densely populated regions experienced higher infection rates.
-
-**Insight:** Targeting resources and interventions in these high-risk areas is essential to mitigate the spread of the virus and reduce the burden on healthcare systems.
-
-### 3. Impact of Interventions:
-
-**Result:** A/B testing shows that regions with stricter lockdown measures and mask mandates had a statistically significant decrease in infection rates compared to regions with looser restrictions.
-
-**Insight:** Stringent public health interventions can be effective in slowing the spread of the virus, emphasizing the importance of adhering to safety measures.
-
-### 4. Time Series Forecasting:
-
-**Result:** Time series analysis predicts a potential resurgence of cases in the upcoming months based on historical data and current trends.
-
-**Insight:** Advanced warning of potential outbreaks can enable proactive measures, such as vaccine distribution, hospital preparedness, and public awareness campaigns.
-
-### 5. Demographic Analysis:
-
-**Result:** Data analysis reveals that elderly populations have a higher mortality rate, while younger individuals are more likely to be asymptomatic or have mild symptoms.
-
-**Insight:** Tailoring vaccination and healthcare strategies to prioritize vulnerable groups is crucial in reducing severe outcomes and mortality.
-
-### 10. Public Perception:
-
-**Result:** Analysis of sentiment from social media data indicates that public sentiment has fluctuated in response to news, government actions, and vaccination campaigns.
-
-**Insight:** Understanding public sentiment can guide effective communication strategies to build trust and compliance with public health guidelines.
-
-## Contributing
-
-If you'd like to contribute to this project, feel free to submit pull requests or open issues. We welcome any improvements, bug fixes, or additional analysis to enhance our understanding of COVID-19 data using Azure services.
-
-Please make sure to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md) and review our [Contribution Guidelines](CONTRIBUTING.md) before getting started.
+### Steps
+1. **Setting up Power BI Connection to Azure SQL**:
+   - Configure Power BI to connect to Azure SQL Database.
+   - Use Azure SQL configurations (server name, database name, credentials) to establish the connection in Power BI.
+2. **Fetching Data into Power BI**:
+   - Design queries or use Power BI's graphical interface to fetch data from Azure SQL Database tables into Power BI's data model.
+3. **Data Analysis in Power BI**:
+   - Perform various analyses such as:
+     - Creating visualizations (charts, graphs, tables) based on fetched data.
+     - Implementing filters, slicers, and other interactive elements to explore and analyze data trends.
+     - Calculating key metrics, generating insights, and creating meaningful reports and dashboards.
 
 ---
 
