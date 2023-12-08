@@ -10,7 +10,7 @@ This comprehensive COVID-19 analysis project leverages Microsoft Azure services 
 - [Project Structure](#project-structure)
 - [Setup](#setup)
 - [Data Ingestion](#data-ingestion)
-- [Data Transformation](#data-transformation)
+- [Data Transformation using Data Flow and Data Bricks](#data-transformation)
 - [Data Analysis](#data-analysis)
 - [Results](#results)
 - [Contributing](#contributing)
