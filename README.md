@@ -19,12 +19,11 @@ This comprehensive COVID-19 analysis project leverages Microsoft Azure services 
 
 Before you get started, you will need the following:
 
-- An Azure subscription
-- Azure Data Factory (ADF): Ensure access to and familiarity with Azure Data Factory for orchestrating data workflows, including data ingestion from various sources into Azure services.
-- Azure Databricks (ADB): Familiarity with Azure Databricks is essential for data transformation tasks, as it provides a collaborative Apache Spark-based analytics platform for processing large-scale data.
-- Azure SQL Database (ASQL): Proficiency in setting up and managing Azure SQL Database, as it serves as the storage solution for processed data in this project.
-- Azure Subscription: Access to an active Azure subscription is required to utilize the Azure services (ADF, ADB, ASQL) and deploy resources necessary for data management and analysis.
-- Power BI: Basic understanding of Power BI for data visualization and reporting purposes, as the project integrates Power BI to create insightful dashboards and reports based on the transformed data from Azure services.
+- **Azure Data Factory (ADF)**: Ensure access to and familiarity with Azure Data Factory for orchestrating data workflows, including data ingestion from various sources into Azure services.
+- **Azure Databricks (ADB)**: Familiarity with Azure Databricks is essential for data transformation tasks, as it provides a collaborative Apache Spark-based analytics platform for processing large-scale data.
+- **Azure SQL Database (ASQL)**: Proficiency in setting up and managing Azure SQL Database, as it serves as the storage solution for processed data in this project.
+- **Azure Subscription**: Access to an active Azure subscription is required to utilize the Azure services (ADF, ADB, ASQL) and deploy resources necessary for data management and analysis.
+- **Power BI**: Basic understanding of Power BI for data visualization and reporting purposes, as the project integrates Power BI to create insightful dashboards and reports based on the transformed data from Azure services.
 
 ## Project Structure
 
@@ -172,5 +171,3 @@ This section describes the process of retrieving data from Azure SQL Database in
 ---
 
 **Disclaimer**: This project is for educational and demonstrative purposes only. It should not be used as a primary source for COVID-19 data. Always rely on official sources and follow recommended safety guidelines.
-
-[License](LICENSE) © Saad Shaikh
